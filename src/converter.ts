@@ -8,6 +8,10 @@ export class Converter {
 
   constructor(private metadataState: MetadataState) {}
 
+  /**
+   * @param {string} query - intermediate transaction language string
+   * @returns {string} formatted SQL-query
+   */
   public convert(query: string): string {
     // init Abstract Syntax Tree
     this.astState.init(query);

@@ -2,6 +2,11 @@ import { Join } from "node-sql-parser";
 import { AstJoinConfig, ColumnListItem } from "../models/ast.model";
 
 export abstract class AstUtils {
+  /**
+   * return join statement
+   * @param {AstJoinConfig} config
+   * @returns {Join}
+   */
   public static getLeftJoinStatement(config: AstJoinConfig): Join {
     const { left, right } = config;
     return {
@@ -18,6 +23,12 @@ export abstract class AstUtils {
     };
   }
 
+  /**
+   * pattern to generate AS select statement
+   * @param {string} tableName
+   * @param {string} fieldName
+   * @returns {string} - AS statement
+   */
   public static getAsConditionSelectStatement(
     tableName: string,
     fieldName: string
@@ -25,7 +36,11 @@ export abstract class AstUtils {
     return `${tableName}.${fieldName}`;
   }
 
-  // the format of tableList item is {type}::{dbName}::{tableName}
+  /**
+   * from [{type}::{dbName}::{tableName}] to [tableName]
+   * @param {string[]} tableList - table list specified by pattern {type}::{dbName}::{tableName}
+   * @returns {string[]} - array of table names
+   */
   public static getTableNameListFromAstTableList(
     tableList: string[]
   ): string[] {
@@ -35,7 +50,11 @@ export abstract class AstUtils {
     );
   }
 
-  // the format of columnList item is {type}::{tableName}::{columnName}
+  /**
+   * @param {string[]} columnList - column list specified by pattern {type}::{tableName}::{columnName}
+   * @param {string[]} tableList - table list specified by pattern {type}::{dbName}::{tableName}
+   * @returns {ColumnListItem[]}
+   */
   public static getColumnListFromAstColumnList(
     columnList: string[],
     tableList: string[]
