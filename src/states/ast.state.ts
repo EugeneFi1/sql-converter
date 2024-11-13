@@ -32,7 +32,7 @@ export class AstState {
 
   public addLeftJoin(condition: AstJoinCondition): void {
     (this.ast.from as From[]).push(AstUtils.getLeftJoinStatement(condition));
-    // update as statement
+    // update AS statement
     this.ast.columns.forEach((col) => {
       const { expr } = col;
       const firstFromTableName = this.ast.from[0].table;

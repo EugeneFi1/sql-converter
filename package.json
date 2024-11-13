@@ -4,7 +4,7 @@
   "description": "Intermediate transaction language string to SQL-query converter",
   "main": "index.ts",
   "scripts": {
-    "example": "npx tsx examples/basic-usage.ts",
+    "example": "npx tsx examples/usage-example.ts",
     "build": "tsc",
     "test": "jest"
   },

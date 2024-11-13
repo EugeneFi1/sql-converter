@@ -11,55 +11,73 @@ export class Converter {
   constructor(private metadataState: MetadataState) {}
 
   public convert(query: string): string {
+    // init Abstract Syntax Tree
     this.initAST(query);
-
+    // selected columns without their "FROM" tables
     const columnWitoutTables = this.astState.getColumnsWithoutTheirTables();
-
     // add JOIN statement logic if there are selected columns without their tables
-    if (columnWitoutTables?.length) {
-      columnWitoutTables.forEach((column) => {
-        const fieldMetaData = this.metadataState.getFieldInfo(
-          column.tableName,
-          column.relationField
+    columnWitoutTables?.forEach((column) => {
+      const fieldMetaData = this.metadataState.getFieldInfo(
+        column.tableName,
+        column.relationField
+      );
+      const relatedTableName = this.metadataState.getFieldTableMetadataName(
+        fieldMetaData.relationFieldMetadataId
+      );
+      // left table name to JOIN
+      let leftTableName = column.tableName;
+      // add JOIN with many-to-many relations table
+      if (fieldMetaData.type === MetadataFieldType.MANY_TO_MANY) {
+        const manyToManyTableName =
+          ConverterUtils.getManyToManyRelationsTableName(column);
+        this.addLeftJoinForManyToManyRelations(
+          manyToManyTableName,
+          column.tableName
         );
-        const relationTableName = this.metadataState.getRelationTableName(
-          fieldMetaData.relationFieldMetadataId
-        );
-        let leftTableName = column.tableName;
-        if (fieldMetaData.type === MetadataFieldType.MANY_TO_MANY) {
-          // left Join
-          const manyToManyTableName =
-            ConverterUtils.getManyToManyTableName(column);
-          // join with many-to-many relations table
-          this.astState.addLeftJoin({
-            table: manyToManyTableName,
-            left: {
-              table: column.tableName,
-              column: "id",
-            },
-            right: {
-              table: manyToManyTableName,
-              column: ConverterUtils.getRelationFieldIdName(column.tableName),
-            },
-          });
-          leftTableName = manyToManyTableName;
-        }
-        this.astState.addLeftJoin({
-          table: relationTableName,
-          as: column.relationField,
-          left: {
-            table: leftTableName,
-            column: ConverterUtils.getRelationFieldIdName(column.relationField),
-          },
-          right: {
-            table: column.relationField,
-            column: "id",
-          },
-        });
-      });
-    }
+        leftTableName = manyToManyTableName;
+      }
+      this.addLeftJoin(relatedTableName, leftTableName, column.relationField);
+    });
 
     return this.getSqlFromAst();
+  }
+
+  // update AST with left join with many-to-many relations table
+  private addLeftJoinForManyToManyRelations(
+    tableName: string,
+    columnTableName: string
+  ): void {
+    this.astState.addLeftJoin({
+      table: tableName,
+      left: {
+        table: columnTableName,
+        column: "id",
+      },
+      right: {
+        table: tableName,
+        column: ConverterUtils.getTablePersistedKeyName(columnTableName),
+      },
+    });
+  }
+
+  // update AST with left join
+  private addLeftJoin(
+    tableName: string,
+    leftTableName: string,
+    rightTableName: string
+  ): void {
+    this.astState.addLeftJoin({
+      table: tableName,
+      as: rightTableName,
+      left: {
+        table: leftTableName,
+        column: ConverterUtils.getTablePersistedKeyName(rightTableName),
+      },
+      right: {
+        table: rightTableName,
+        column: "id",
+      },
+    });
   }
 
   private getSqlFromAst(): string {

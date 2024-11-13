@@ -7,6 +7,8 @@ const stringSqlExample = [
   "SELECT departments.name, avg(salary) FROM users GROUP BY departments.name",
   "SELECT id, title, owner.id, watchers.id FROM tasks",
   "SELECT id, title, owner.id AS 'owner.id', watchers.id FROM tasks RIGHT JOIN users AS owner ON tasks.owner_id = owner.id",
+  "SELECT departments.name, min(salary) FROM users GROUP BY departments.name",
+  "SELECT tasks.id FROM (SELECT id, title, owner.id, watchers.id FROM tasks)",
 ];
 
 const sqlGenerator = new SqlConverter({
