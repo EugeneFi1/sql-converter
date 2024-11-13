@@ -22,7 +22,7 @@ export interface ColumnTable {
   column: string;
 }
 
-export interface AstJoinCondition {
+export interface AstJoinConfig {
   table: string;
   as?: string;
   left: ColumnTable;

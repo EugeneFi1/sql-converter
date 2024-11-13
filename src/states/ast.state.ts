@@ -1,5 +1,5 @@
 import { From, Select } from "node-sql-parser";
-import { AstJoinCondition, AstStateConfig } from "../models/ast.model";
+import { AstJoinConfig, AstStateConfig } from "../models/ast.model";
 import { AstUtils } from "../utils/ast.utils";
 
 export class AstState {
@@ -30,34 +30,38 @@ export class AstState {
       );
   }
 
-  public addLeftJoin(condition: AstJoinCondition): void {
-    (this.ast.from as From[]).push(AstUtils.getLeftJoinStatement(condition));
-    // update AS statement
+  public addLeftJoin(joinConfig: AstJoinConfig): void {
+    (this.ast.from as From[]).push(AstUtils.getLeftJoinStatement(joinConfig));
+    // update AS statements for SELECT columns
+    this.updateAsStatementsBasedOnJoin(joinConfig);
+  }
+
+  private updateAsStatementsBasedOnJoin(joinConfig: AstJoinConfig): void {
     this.ast.columns.forEach((col) => {
       const { expr } = col;
       const firstFromTableName = this.ast.from[0].table;
-      if (expr.type === "column_ref") {
-        if (expr.table === condition.table || expr.table === condition.as) {
-          col.as = `${condition.as || condition.table}.${expr.column}`;
-        } else if (!col.as && !expr.table) {
-          expr.table = firstFromTableName;
-        }
-      } else if (expr.type === "aggr_func") {
-        const argsExpr = col.expr.args.expr;
-        let asCondition = condition.as || condition.table;
-        if (!col.as && !argsExpr.table) {
-          argsExpr.table = firstFromTableName;
-          asCondition = firstFromTableName;
-        }
-        if (!col.as) {
-          col.as = AstUtils.getAsConditionSelectStatement(
-            asCondition,
-            argsExpr.column
-          );
-        }
+      const { table, as } = joinConfig;
+      let tableName = as || table;
+      switch (expr.type) {
+        case "column_ref":
+          if (expr.table === table || expr.table === as) {
+            col.as = `${tableName}.${expr.column}`;
+          } else if (!col.as && !expr.table) {
+            expr.table = firstFromTableName;
+          }
+          break;
+        case "aggr_func":
+          const argsExpr = col.expr.args.expr;
+          if (!col.as) {
+            if (!argsExpr.table) {
+              tableName = argsExpr.table = firstFromTableName;
+            }
+            col.as = AstUtils.getAsConditionSelectStatement(
+              tableName,
+              argsExpr.column
+            );
+          }
       }
     });
   }
-
-  public addAsStatement(): void {}
 }

@@ -1,13 +1,13 @@
 import { Join } from "node-sql-parser";
-import { AstJoinCondition } from "../models/ast.model";
+import { AstJoinConfig } from "../models/ast.model";
 
 export abstract class AstUtils {
-  public static getLeftJoinStatement(condition: AstJoinCondition): Join {
-    const { left, right } = condition;
+  public static getLeftJoinStatement(config: AstJoinConfig): Join {
+    const { left, right } = config;
     return {
       db: null,
-      table: condition.table,
-      as: condition.as,
+      table: config.table,
+      as: config.as,
       join: "LEFT JOIN",
       on: {
         type: "binary_expr",
