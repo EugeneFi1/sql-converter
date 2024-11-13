@@ -7,7 +7,6 @@ export class SqlConverter {
   private metaDataState: MetadataState;
 
   /**
-   *
    * @param {MetadataStateConfig} config - config to init metadata
    */
   constructor(config: MetadataStateConfig) {
