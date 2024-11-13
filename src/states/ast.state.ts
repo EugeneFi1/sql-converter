@@ -1,4 +1,4 @@
-import { BaseFrom, From, Parser, Select } from "node-sql-parser";
+import { BaseFrom, From, Parser, Select, TableExpr } from "node-sql-parser";
 import { AstJoinConfig, AstStateConfig } from "../models/ast.model";
 import { AstUtils } from "../utils/ast.utils";
 
@@ -74,15 +74,37 @@ export class AstState {
    * @param {AstJoinConfig} joinConfig
    */
   public addLeftJoin(joinConfig: AstJoinConfig): void {
-    (this.ast.from as From[]).push(AstUtils.getLeftJoinStatement(joinConfig));
-    // update AS statements for SELECT columns
-    this.updateAsStatementsBasedOnJoin(joinConfig);
+    // get proper AST (for nested SELECT)
+    const getAst = (ast: Select): Select => {
+      const tableExpr = (ast.from as TableExpr[])
+        .filter(({ expr }) => !!expr)
+        .find((fromItem) => {
+          const tableList = (fromItem.expr.ast.from as BaseFrom[]).map(
+            ({ table }) => table
+          );
+          if (
+            tableList.includes(joinConfig.right.table) ||
+            tableList.includes(joinConfig.left.table)
+          ) {
+            return fromItem;
+          }
+        });
+      return tableExpr ? getAst(tableExpr.expr.ast) : ast;
+    };
+    const astToUpdate = getAst(this.ast);
+    (astToUpdate.from as From[]).push(
+      AstUtils.getLeftJoinStatement(joinConfig)
+    );
+    this.updateAsStatementsBasedOnJoin(joinConfig, astToUpdate);
   }
 
-  private updateAsStatementsBasedOnJoin(joinConfig: AstJoinConfig): void {
-    this.ast.columns.forEach((col) => {
+  private updateAsStatementsBasedOnJoin(
+    joinConfig: AstJoinConfig,
+    ast: Select
+  ): void {
+    ast.columns.forEach((col) => {
       const { expr } = col;
-      const firstFromTableName = this.ast.from[0].table;
+      const firstFromTableName = ast.from[0].table;
       const { table, as } = joinConfig;
       let tableName = as || table;
       switch (expr.type) {

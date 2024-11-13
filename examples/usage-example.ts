@@ -16,6 +16,6 @@ const sqlGenerator = new SqlConverter({
   fields: FIELD_METADATA,
 });
 
-const stringSql = stringSqlExample[1];
+const stringSql = stringSqlExample[2];
 
 console.log(sqlGenerator.convert(stringSql));
