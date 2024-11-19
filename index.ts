@@ -4,14 +4,12 @@ import { MetadataState } from "./src/states/metadata.state";
 
 export class SqlConverter {
   private converter: Converter;
-  private metaDataState: MetadataState;
 
   /**
    * @param {MetadataStateConfig} config - config to init metadata
    */
   constructor(config: MetadataStateConfig) {
-    this.metaDataState = new MetadataState(config);
-    this.converter = new Converter(this.metaDataState);
+    this.converter = new Converter(new MetadataState(config));
   }
 
   /**

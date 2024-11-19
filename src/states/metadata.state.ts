@@ -1,19 +1,16 @@
 import {
   MetadataField,
   MetadataStateConfig,
-  MetadataTable,
+  MetadataTable
 } from "../models/metadata.model";
 
 /** class to handle tables metadata */
 export class MetadataState {
   // MetadataTable: MetadataField
-  private tableFiledsMap: Record<
-    MetadataTable["name"],
-    Record<MetadataField["name"], MetadataField>
-  > = {};
+  private tableFieldsMap: Record<MetadataTable["name"], Record<MetadataField["name"], MetadataField>>
+    = {};
   // map between table id and name - MetadataTable.id: MetadataTable.name
-  private tableIdToNameMap: Record<MetadataTable["id"], MetadataTable["name"]> =
-    {};
+  private tableIdToNameMap: Record<MetadataTable["id"], MetadataTable["name"]> = {};
   // map between field id and fieldMetadata - MetadataField.id: MetadataField
   private filedIdToFieldMap: Record<MetadataField["id"], MetadataField> = {};
 
@@ -33,7 +30,7 @@ export class MetadataState {
     tableName: MetadataTable["name"],
     fieldName: MetadataField["name"]
   ): MetadataField | undefined {
-    return this.tableFiledsMap[tableName][fieldName];
+    return this.tableFieldsMap[tableName][fieldName];
   }
 
   /**
@@ -49,19 +46,19 @@ export class MetadataState {
     this.filedIdToFieldMap = config.fields.reduce(
       (prevValue, currentValue) => ({
         ...prevValue,
-        [currentValue.id]: currentValue,
+        [currentValue.id]: currentValue
       }),
       {}
     );
 
     config.tables.forEach((table) => {
       this.tableIdToNameMap[table.id] = table.name;
-      this.tableFiledsMap[table.name] = config.fields
+      this.tableFieldsMap[table.name] = config.fields
         .filter(({ tableMetadataId }) => tableMetadataId === table.id)
         .reduce(
           (prevValue, currentValue) => ({
             ...prevValue,
-            [currentValue.name]: currentValue,
+            [currentValue.name]: currentValue
           }),
           {}
         );

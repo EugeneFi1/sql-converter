@@ -30,12 +30,12 @@ export class AstState {
         ast,
         tableList: tableList.map((val) => ({
           name: val,
-          asStatement: tableAsStatementMap[val],
+          asStatement: tableAsStatementMap[val]
         })),
         columnList: AstUtils.getColumnListFromAstColumnList(
           tableColumnAst.columnList,
           tableList
-        ),
+        )
       };
     } else {
       // throw error if not SELECT or multiple query
@@ -48,7 +48,7 @@ export class AstState {
    */
   public generateSql(): string {
     return this.ast
-      ? this.parser.sqlify(this.ast).replaceAll("`", '"')
+      ? this.parser.sqlify(this.ast).replaceAll("`", "\"")
       : undefined;
   }
 

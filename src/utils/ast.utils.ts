@@ -18,8 +18,8 @@ export abstract class AstUtils {
         type: "binary_expr",
         operator: "=",
         left: { type: "column_ref", table: left.table, column: left.column },
-        right: { type: "column_ref", table: right.table, column: right.column },
-      },
+        right: { type: "column_ref", table: right.table, column: right.column }
+      }
     };
   }
 
@@ -74,8 +74,8 @@ export abstract class AstUtils {
               : tableName,
           relationField: isTableNameNotIncludedInTablesList
             ? relationField
-            : undefined,
-        },
+            : undefined
+        }
       ];
     }, []);
   }

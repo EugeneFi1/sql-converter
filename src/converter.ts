@@ -6,7 +6,8 @@ import { ConverterUtils } from "./utils/converter.utils";
 export class Converter {
   private astState = new AstState();
 
-  constructor(private metadataState: MetadataState) {}
+  constructor(private metadataState: MetadataState) {
+  }
 
   /**
    * @param {string} query - intermediate transaction language string
@@ -16,10 +17,10 @@ export class Converter {
     // init Abstract Syntax Tree
     this.astState.init(query);
     // selected columns without their "FROM" tables
-    const columnWitoutTables = this.astState.getColumnsWithoutTheirTables();
+    const columnWithoutTables = this.astState.getColumnsWithoutTheirTables();
     // automatically add the JOIN according to the metadata
     // (add JOIN statement logic if there are selected columns without their tables)
-    columnWitoutTables?.forEach((column) => {
+    columnWithoutTables?.forEach((column) => {
       const fieldMetaData = this.metadataState.getFieldInfo(
         column.tableName,
         column.relationField
@@ -54,12 +55,12 @@ export class Converter {
       table: tableName,
       left: {
         table: columnTableName,
-        column: "id",
+        column: "id"
       },
       right: {
         table: tableName,
-        column: ConverterUtils.getTablePersistedKeyName(columnTableName),
-      },
+        column: ConverterUtils.getTablePersistedKeyName(columnTableName)
+      }
     });
   }
 
@@ -74,12 +75,12 @@ export class Converter {
       as: rightTableName,
       left: {
         table: leftTableName,
-        column: ConverterUtils.getTablePersistedKeyName(rightTableName),
+        column: ConverterUtils.getTablePersistedKeyName(rightTableName)
       },
       right: {
         table: rightTableName,
-        column: "id",
-      },
+        column: "id"
+      }
     });
   }
 }
